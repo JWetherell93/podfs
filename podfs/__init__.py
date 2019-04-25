@@ -1,1 +1,0 @@
-from .MeshReader import foamMesh
