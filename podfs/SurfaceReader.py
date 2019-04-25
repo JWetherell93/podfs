@@ -2,7 +2,7 @@ import numpy as np
 import os
 from os import listdir
 from os.path import isfile, join, isdir
-from utilities import removeChars, cleanDir
+from .utilities import removeChars, cleanDir
 import errno
 
 def writeFile(fullName, data):

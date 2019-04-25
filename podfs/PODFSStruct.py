@@ -3,14 +3,7 @@ import numpy.matlib
 import sys
 import os
 import math
-
-def writeFile(fullName, data):
-
-    with open(fullName, "w+") as f:
-
-        for i in range(0, len(data)):
-
-            f.write('{:F}\n'.format(data[i]))
+from .utilities import writeFile
 
 class Mode:
     def __init__(self,  b_ij, NF, spatialMode, energy ):

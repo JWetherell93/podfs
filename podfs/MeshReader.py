@@ -1,7 +1,7 @@
 import numpy as np
 import struct
 import copy
-from utilities import isInt, removeChars
+from .utilities import isInt, removeChars
 
 class face:
     def __init__(self, type, pIDs):

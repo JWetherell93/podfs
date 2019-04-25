@@ -37,3 +37,11 @@ def cleanDir(dir):
         file = dir + "/" + dirContents[i]
 
         removeFile(file)
+
+def writeFile(fullName, data):
+
+    with open(fullName, "w+") as f:
+
+        for i in range(0, len(data)):
+
+            f.write('{:F}\n'.format(data[i]))
