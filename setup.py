@@ -6,9 +6,9 @@ def readme():
         return f.read()
 
 
-setup(name='ofreader',
+setup(name='podfs',
       version='0.1',
-      description='Python reader for native openfoam files',
+      description='Library for PODFS decomposition for Boundary Condition Reconstruction',
       long_description=readme(),
       classifiers=[
         'Development Status :: 3 - Alpha',
@@ -16,12 +16,12 @@ setup(name='ofreader',
         'Programming Language :: Python :: 2.7',
         'Topic :: Text Processing :: Linguistic',
       ],
-      keywords='openfoam reader python',
-      url='https://github.com/JWetherell93/ofreader',
-      author='JWethere93',
+      keywords='pod fourier cfd decomposition',
+      url='https://github.com/JWetherell93/podfs',
+      author='JWetherell93',
       author_email='jwetherell93@gmail.com',
       license='UTC',
-      packages=['ofreader'],
+      packages=['podfs'],
       install_requires=[
             'numpy',
             ],
