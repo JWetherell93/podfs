@@ -2,16 +2,8 @@ import numpy as np
 import os
 from os import listdir
 from os.path import isfile, join, isdir
-from .utilities import removeChars, cleanDir
+from .utilities import removeChars, cleanDir, writeFile
 import errno
-
-def writeFile(fullName, data):
-
-    with open(fullName, "w+") as f:
-
-        for i in range(0, len(data)):
-
-            f.write('{:F}\n'.format(data[i]))
 
 class vectorField:
 
@@ -230,8 +222,6 @@ class RawData:
     def __init__(self, dir, surfaceName, vars):
 
         self.readSurfaceData(dir, surfaceName, vars)
-
-        self.writeFile = writeFile
 
     def readSurfaceData(self, dir, surfaceName, vars):
 
