@@ -1,3 +1,4 @@
+import argparse
 from argparse import ArgumentParser
 
 class MyArgumentParser(ArgumentParser):
@@ -22,10 +23,13 @@ def main():
 							prog = 'podfs',
 							usage = '%(prog)s [options]',
 							description = 'Script for PODFS data compression, including pre-processor options',
-							fromfile_prefix_chars = '@'
+							fromfile_prefix_chars = '@',
+							formatter_class=argparse.MetavarTypeHelpFormatter
 							)
 
-	parser.add_argument('--readCase', action='store_true')
+	parser.add_argument('--vars', nargs='*')
+
+	parser.add_argument('--readWholeCase', action='store_true')
 	parser.add_argument('--caseDir')
 
 	parser.add_argument('--readSurfaces', action='store_true')
@@ -38,20 +42,28 @@ def main():
 
 	parser.add_argument('--rotate', action='store_true')
 
-	parser.add_argument('--saveRawData', action='store_true')
+	parser.add_argument('--saveRawData', action='store_true', help='Save pre-processed raw data')
+	parser.add_argument('--rawDataDir', help='Directory to write pre-processed raw data to')
+
+	parser.add_argument('--et', help='Energy target for calculating which fourier modes to use')
 
 	inputs = parser.parse_args()
 
-	if inputs.readCase:
+	if inputs.readWholeCase:
 
 		# Extract data from OpenFOAM Case
 		print "Extracting data from case: " + inputs.caseDir
 
 	if inputs.readSurfaces:
 
+		surfaceData = list()
+
 		# Read data from surfaces output by OpenFOAM post processing
 		for i in range(0, len(inputs.surfaces)):
+
 			print "Reading data from surface: " + inputs.surfaces[i]
+
+			surfaceData.append( RawData(inputs.surfaceDir, inputs.surfaces[i], inputs.vars) )
 
 	if inputs.interpolate or inputs.translate or inputs.rotate:
 
@@ -59,5 +71,7 @@ def main():
 
 	if inputs.saveRawData:
 
-		# Save processed surface data
-		print "Saving raw data"
+		if inputs.readSurfaces:
+			for i in range(len(surfaceData)):
+				print "Saving raw data for surface: " + inputs.surfaces[i]
+				surfaceData[i].write(inputs.rawDataDir + '/' + inputs.surfaces[i])
