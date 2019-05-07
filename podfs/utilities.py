@@ -1,6 +1,7 @@
 import os
 import sys
 import shutil
+import numpy as np
 
 def isInt(x):
     try:
@@ -45,3 +46,13 @@ def writeFile(fullName, data):
         for i in range(0, len(data)):
 
             f.write('{:F}\n'.format(data[i]))
+
+def writeVectorFile(fullName, data):
+
+    with open(fullName, "w+") as f:
+
+        for i in range(0, np.shape(data)[0]):
+
+            f.write('{:F} '.format(data[i, 0]))
+            f.write('{:F} '.format(data[i, 1]))
+            f.write('{:F}\n'.format(data[i, 2]))

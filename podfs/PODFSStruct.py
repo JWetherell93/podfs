@@ -3,7 +3,7 @@ import numpy.matlib
 import sys
 import os
 import math
-from .utilities import writeFile
+from utilities import writeFile
 
 class Mode:
     def __init__(self,  b_ij, NF, spatialMode, energy ):
@@ -14,8 +14,6 @@ class Mode:
         self.energy = energy
 
     # def write(self, format, writeDir):
-
-
 
 class Modes:
     def __init__(self, spatialModes, cInd, numFcs, c, NM, NF, period, energy, meanField):
@@ -63,8 +61,6 @@ class Modes:
     #         self.modes[i].write("openfoam", writeDir + modeNumber)
     #
     #     writeFile(writeDir + "meanField", self.meanField)
-
-
 
 class PODFS:
 
@@ -196,7 +192,7 @@ class PODFS:
             cMod = np.abs(c[:,i])
 
             for j in range (0,numFcs):
-        		cInd[i,j]=j
+                cInd[i,j]=j
 
             cMod,cInd[i,:]=zip(*sorted(zip(cMod,cInd[i,:]),reverse=True))
 
@@ -210,7 +206,7 @@ class PODFS:
                 energy += np.abs( c[ cInd[ i, NF[i] ], i ] )
                 NF[i] += 1
 
-            print "Fourier Coeffs for Mode " + str(i) + ": " + str(NF[i])
+            print( "Fourier Coeffs for Mode " + str(i) + ": " + str(NF[i]) )
 
         self.cInd = cInd
         self.numFcs = numFcs

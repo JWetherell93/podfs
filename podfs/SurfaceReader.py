@@ -2,7 +2,7 @@ import numpy as np
 import os
 from os import listdir
 from os.path import isfile, join, isdir
-from .utilities import removeChars, cleanDir, writeFile
+from utilities import removeChars, cleanDir, writeFile, writeVectorFile
 import errno
 
 class vectorField:
@@ -26,13 +26,13 @@ class vectorField:
 
     def readField(self):
 
-        print "READING VARIABLE: " + self.name
+        print( "READING VARIABLE: " + self.name )
 
         for i in range( 0, len(self.times) ):
 
             time = self.times[i]
 
-            print "Time = " + time + "s"
+            print( "Time = " + time + "s" )
 
             fullFileName = self.path + time + "/" + self.name + "_" + self.surfaceName
 
@@ -46,7 +46,7 @@ class vectorField:
             self.component2.append( varData[:,1] )
             self.component3.append( varData[:,2] )
 
-        print "                             "
+        print()
 
     def readSurfaceVTK(self, file, binary):
 
@@ -89,31 +89,31 @@ class vectorField:
 
     def createWriteDir(self, writePath):
 
-        for i in ["x", "y", "z"]:
+        folderName = writePath + "/" + self.name
 
-            folderName = writePath + "/" + self.name + i
+        if os.path.exists(folderName):
+            cleanDir(folderName)
 
-            if os.path.exists(folderName):
-                cleanDir(folderName)
-
-            else:
-                os.makedirs(folderName)
+        else:
+            os.makedirs(folderName)
 
     def write(self, writePath):
 
         self.createWriteDir(writePath)
 
-        print "WRITING VARIABLE: " + self.name
+        print( "WRITING VARIABLE: " + self.name )
 
-        for i in range(0, len(self.component1)):
+        for i in range(0, np.shape(self.component1)[0]):
 
-            fullName1 = writePath + "/" + self.name + "x" + "/" + '{:.6F}'.format(float(self.times[i]))
-            fullName2 = writePath + "/" + self.name + "y" + "/" + '{:.6F}'.format(float(self.times[i]))
-            fullName3 = writePath + "/" + self.name + "z" + "/" + '{:.6F}'.format(float(self.times[i]))
+            fullName = writePath + "/" + self.name + "/" + '{:.6F}'.format(float(self.times[i]))
 
-            self.writeFile(fullName1, self.component1[i])
-            self.writeFile(fullName2, self.component2[i])
-            self.writeFile(fullName3, self.component3[i])
+            components = np.array(np.zeros( [len(self.component1[i]),3] ))
+
+            components[:,0] = self.component1[i]
+            components[:,1] = self.component2[i]
+            components[:,2] = self.component3[i]
+
+            writeVectorFile(fullName, components )
 
 class scalarField:
 
@@ -134,13 +134,13 @@ class scalarField:
 
     def readField(self):
 
-        print "READING VARIABLE: " + self.name
+        print( "READING VARIABLE: " + self.name )
 
         for i in range( 0, len(self.times) ):
 
             time = self.times[i]
 
-            print "Time = " + time + "s"
+            print( "Time = " + time + "s" )
 
             fullFileName = self.path + time + "/" + self.name + "_" + self.surfaceName
 
@@ -152,7 +152,7 @@ class scalarField:
 
             self.field.append( varData )
 
-        print "                             "
+        print()
 
     def readSurfaceVTK(self, file, binary):
 
@@ -209,17 +209,19 @@ class scalarField:
 
         self.createWriteDir(writePath)
 
-        print "WRITING VARIABLE: " + self.name
+        print( "WRITING VARIABLE: " + self.name )
 
         for i in range(0, len(self.field)):
 
             fullName = writePath + "/" + self.name + "/" + '{:.6F}'.format(float(self.times[i]))
 
-            self.writeFile(fullName, self.field[i])
+            writeFile(fullName, self.field[i])
 
 class RawData:
 
     def __init__(self, dir, surfaceName, vars):
+
+        self.surfaceName = surfaceName
 
         self.readSurfaceData(dir, surfaceName, vars)
 
@@ -247,9 +249,9 @@ class RawData:
 
         for i in range(0, len(self.variables)):
 
-            self.variables[i].write(writeDir)
+            self.variables[i].write(writeDir + "/" + self.surfaceName)
 
-        print "WRITING COORDINATES"
-        self.writeFile(writeDir + "/" + "x", self.variables[0].x[0])
-        self.writeFile(writeDir + "/" + "y", self.variables[0].y[0])
-        self.writeFile(writeDir + "/" + "z", self.variables[0].z[0])
+        print( "WRITING COORDINATES" )
+        writeFile(writeDir + "/" + self.surfaceName + "/" + "x", self.variables[0].x[0])
+        writeFile(writeDir + "/" + self.surfaceName + "/" + "y", self.variables[0].y[0])
+        writeFile(writeDir + "/" + self.surfaceName + "/" + "z", self.variables[0].z[0])
