@@ -162,14 +162,6 @@ class InputData:
 
     def __init__(self, dataDir, scalars, vectors, coordType):
 
-        # vars is a list of variables to decompose
-        # Currently accepted variables are:
-        # Ux, Uy, Uz, p, p_rgh, T, alpha, LS, k, epsilon, omega
-
-        # self.initialiseVarList()
-
-        # self.setVarsToUse(scalars, vectors)
-
         self.scalars = scalars
         self.vectors = vectors
 
@@ -191,39 +183,6 @@ class InputData:
         self.readCoordinateData()
 
         self.readTimesteps()
-
-    # def initialiseVarList(self):
-    #
-    #     self.availScalars = list()
-    #
-    #     # Scalars
-    #     self.availScalars.append("p")
-    #     self.availScalars.append("p_rgh")
-    #     self.availScalars.append("T")
-    #     self.availScalars.append("alpha")
-    #     self.availScalars.append("LS")
-    #     self.availScalars.append("k")
-    #     self.availScalars.append("epsilon")
-    #     self.availScalars.append("omega")
-    #
-    #     self.availVectors = list()
-    #
-    #     # Vectors
-    #     self.availVectors.append("U")
-    #
-    # def setVarsToUse(self,  vars):
-    #
-    #     self.useScalars = np.array(np.zeros([len(self.availScalars)]))
-    #
-    #     for i in range(0,len(self.availScalars)):
-    #
-    #         if self.availScalars[i] in vars:
-    #             self.useScalars[i] = 1
-    #
-    #     unrecognisedVars = [x for x in vars if x not in self.availScalars]
-    #
-    #     for j in range(len(unrecognisedVars)):
-    #         print( "Scalar " + unrecognisedVars[j] + " not recognised. Please check for typos or modify source code" )
 
     def checkVarsExist(self, dataDir, coordType):
 

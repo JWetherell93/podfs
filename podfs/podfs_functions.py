@@ -41,7 +41,7 @@ def addArguments(parser):
     parser.add_argument('--et', type=float, help='Energy target for calculating which fourier modes to use')
 
     parser.description = textwrap.dedent('''\
-            Program for PODFS data compression. Pre-processor options availableself.
+            Program for PODFS data compression. Pre-processor options available.
 
             Arguments can be given by file, using "@" before file name. For example
             "podfs @inputs.txt"
