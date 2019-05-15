@@ -2,59 +2,73 @@ import os
 from utilities import cleanDir, writeFoamHeader
 import numpy as np
 
-def writeOF(Input, Modes, writeDir, args):
+def writeOF(InputData, Modes, writeDir, args):
 
-    makeFolderTree(writeDir, Modes, Input, args)
+    makeFolderTree(writeDir, Modes, InputData, args)
+
+    coords = np.array([])
+
+    coords = np.append(coords, InputData.coordinates.x, axis=0)
+    coords = np.append(coords, InputData.coordinates.y, axis=0)
+    coords = np.append(coords, InputData.coordinates.z, axis=0)
+
+    writeVectorSpatialMode(0, writeDir+"/", "points", coords, InputData.nPoints)
 
     startRow = 0
 
-    for i in range(0, len(Input.scalars)):
+    for i in range(0, len(InputData.scalars)):
 
-        var = Input.scalars[i]
+        var = InputData.scalars[i]
 
-        startRow = startRow + Input.nPoints * i
+        startRow = startRow + InputData.nPoints * i
 
         varDir = writeDir + "/" + var + "/"
 
-        writeScalarSpatialMode(startRow, varDir, "meanField", Modes.meanField[:,0],  Input.nPoints)
+        writeScalarSpatialMode(startRow, varDir, "meanField", Modes.meanField[:,0],  InputData.nPoints)
 
         for j in range(0, len(Modes.modes)):
 
             modeDir = writeDir + "/" + var + "/mode" + '{0:04d}'.format(j) + "/"
 
-            writeScalarSpatialMode(startRow, modeDir, "spatialMode", Modes.modes[j].spatialMode, Input.nPoints)
+            writeScalarSpatialMode(startRow, modeDir, "spatialMode", Modes.modes[j].spatialMode, InputData.nPoints)
 
-            writeVectorSpatialMode(0, modeDir, "fourierCoeffs", np.reshape(Modes.modes[j].b_ij, [-1,1])[:,0], Modes.modes[j].NF)
+            fourier = np.array([])
 
-    if len(Input.scalars) > 0:
-        startRow = startRow + Input.nPoints
+            fourier = np.append(fourier, Modes.modes[j].b_ij[:,0], axis=0)
+            fourier = np.append(fourier, Modes.modes[j].b_ij[:,1], axis=0)
+            fourier = np.append(fourier, Modes.modes[j].b_ij[:,2], axis=0)
 
-    for i in range(0, len(Input.vectors)):
+            writeVectorSpatialMode(0, modeDir, "fourierCoeffs", fourier, Modes.modes[j].NF)
 
-        var = Input.vectors[i]
+    if len(InputData.scalars) > 0:
+        startRow = startRow + InputData.nPoints
 
-        startRow = startRow + Input.nPoints * i * 3
+    for i in range(0, len(InputData.vectors)):
+
+        var = InputData.vectors[i]
+
+        startRow = startRow + InputData.nPoints * i * 3
 
         varDir = writeDir + "/" + var + "/"
 
-        writeVectorSpatialMode(startRow, varDir, "meanField", Modes.meanField[:,0],  Input.nPoints)
+        writeVectorSpatialMode(startRow, varDir, "meanField", Modes.meanField[:,0],  InputData.nPoints)
 
         for j in range(0, len(Modes.modes)):
 
             modeDir = writeDir + "/" + var + "/mode" + '{0:04d}'.format(j) + "/"
 
-            writeVectorSpatialMode(startRow, modeDir, "spatialMode", Modes.modes[j].spatialMode, Input.nPoints)
+            writeVectorSpatialMode(startRow, modeDir, "spatialMode", Modes.modes[j].spatialMode, InputData.nPoints)
 
             writeVectorSpatialMode(0, modeDir, "fourierCoeffs", np.reshape(Modes.modes[j].b_ij, [-1,1])[:,0], Modes.modes[j].NF)
 
-    if len(Input.vectors) > 0:
-        startRow = startRow + Input.nPoints * 3
+    if len(InputData.vectors) > 0:
+        startRow = startRow + InputData.nPoints * 3
 
-def makeFolderTree(writeDir, Modes, Input, args):
+def makeFolderTree(writeDir, Modes, InputData, args):
 
-    for i in range(0, len(Input.vars)):
+    for i in range(0, len(InputData.vars)):
 
-        folderName = writeDir + "/" + Input.vars[i].name
+        folderName = writeDir + "/" + InputData.vars[i].name
 
         if os.path.exists(folderName):
             cleanDir(folderName)
@@ -90,7 +104,7 @@ def writeVectorSpatialMode(startRow, modeDir, filename, data, nPoints):
 
     with open(modeDir + filename, "w") as spatialFile:
 
-        writeFoamHeader(spatialFile, "vectorFieldField")
+        writeFoamHeader(spatialFile, "vectorField")
 
         spatialFile.write("\n")
 
