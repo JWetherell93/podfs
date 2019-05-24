@@ -134,7 +134,7 @@ class Vector:
 
         for i in range(nTimeSteps):
 
-            a[:,i] = np.reshape(self.timeStepData[i], (1,-1))
+            a[:,i] = np.reshape(self.timeStepData[i], (1,-1), order='F')
 
         return a
 
