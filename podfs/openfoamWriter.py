@@ -12,7 +12,7 @@ def writeOF(InputData, Modes, writeDir, args):
     coords = np.append(coords, InputData.coordinates.y, axis=0)
     coords = np.append(coords, InputData.coordinates.z, axis=0)
 
-    writeVectorSpatialMode(0, writeDir+"/", "points", coords, InputData.nPoints)
+    writeVectorSpatialMode(0, writeDir+"/", "points", coords, InputData.nPoints, False)
 
     startRow = 0
 
@@ -24,13 +24,13 @@ def writeOF(InputData, Modes, writeDir, args):
 
         varDir = writeDir + "/" + var + "/"
 
-        writeScalarSpatialMode(startRow, varDir, "meanField", Modes.meanField[:,0],  InputData.nPoints)
+        writeScalarSpatialMode(startRow, varDir, "meanField", Modes.meanField[:,0],  InputData.nPoints, True)
 
         for j in range(0, len(Modes.modes)):
 
             modeDir = writeDir + "/" + var + "/mode" + '{0:04d}'.format(j) + "/"
 
-            writeScalarSpatialMode(startRow, modeDir, "spatialMode", Modes.modes[j].spatialMode, InputData.nPoints)
+            writeScalarSpatialMode(startRow, modeDir, "spatialMode", Modes.modes[j].spatialMode, InputData.nPoints, True)
 
             fourier = np.array([])
 
@@ -38,7 +38,7 @@ def writeOF(InputData, Modes, writeDir, args):
             fourier = np.append(fourier, Modes.modes[j].b_ij[:,1], axis=0)
             fourier = np.append(fourier, Modes.modes[j].b_ij[:,2], axis=0)
 
-            writeVectorSpatialMode(0, modeDir, "fourierCoeffs", fourier, Modes.modes[j].NF)
+            writeVectorSpatialMode(0, modeDir, "fourierCoeffs", fourier, Modes.modes[j].NF, False)
 
     if len(InputData.scalars) > 0:
         startRow = startRow + InputData.nPoints
@@ -51,15 +51,21 @@ def writeOF(InputData, Modes, writeDir, args):
 
         varDir = writeDir + "/" + var + "/"
 
-        writeVectorSpatialMode(startRow, varDir, "meanField", Modes.meanField[:,0],  InputData.nPoints)
+        writeVectorSpatialMode(startRow, varDir, "meanField", Modes.meanField[:,0],  InputData.nPoints, True)
 
         for j in range(0, len(Modes.modes)):
 
             modeDir = writeDir + "/" + var + "/mode" + '{0:04d}'.format(j) + "/"
 
-            writeVectorSpatialMode(startRow, modeDir, "spatialMode", Modes.modes[j].spatialMode, InputData.nPoints)
+            writeVectorSpatialMode(startRow, modeDir, "spatialMode", Modes.modes[j].spatialMode, InputData.nPoints, True)
 
-            writeVectorSpatialMode(0, modeDir, "fourierCoeffs", np.reshape(Modes.modes[j].b_ij, [-1,1])[:,0], Modes.modes[j].NF)
+            fourier = np.array([])
+
+            fourier = np.append(fourier, Modes.modes[j].b_ij[:,0], axis=0)
+            fourier = np.append(fourier, Modes.modes[j].b_ij[:,1], axis=0)
+            fourier = np.append(fourier, Modes.modes[j].b_ij[:,2], axis=0)
+
+            writeVectorSpatialMode(0, modeDir, "fourierCoeffs", fourier, Modes.modes[j].NF, False)
 
     if len(InputData.vectors) > 0:
         startRow = startRow + InputData.nPoints * 3
@@ -82,13 +88,13 @@ def makeFolderTree(writeDir, Modes, InputData, args):
 
              os.makedirs(modeFolder)
 
-def writeScalarSpatialMode(startRow, modeDir, filename, data, nPoints):
+def writeScalarSpatialMode(startRow, modeDir, filename, data, nPoints, header):
 
     with open(modeDir + filename, "w") as spatialFile:
 
-        writeFoamHeader(spatialFile, "scalarField")
-
-        spatialFile.write("\n")
+        if header:
+            writeFoamHeader(spatialFile, "scalarField")
+            spatialFile.write("\n")
 
         spatialFile.write(str(nPoints))
 
@@ -100,13 +106,13 @@ def writeScalarSpatialMode(startRow, modeDir, filename, data, nPoints):
 
         spatialFile.write(")")
 
-def writeVectorSpatialMode(startRow, modeDir, filename, data, nPoints):
+def writeVectorSpatialMode(startRow, modeDir, filename, data, nPoints, header):
 
     with open(modeDir + filename, "w") as spatialFile:
 
-        writeFoamHeader(spatialFile, "vectorField")
-
-        spatialFile.write("\n")
+        if header:
+            writeFoamHeader(spatialFile, "vectorField")
+            spatialFile.write("\n")
 
         spatialFile.write(str(nPoints) + "\n")
 
