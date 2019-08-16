@@ -1,8 +1,19 @@
 import argparse
 from argparse import ArgumentParser
+import sys
+import numpy as np
+import os
+
+from .PODFSStruct import PODFS
+from .restart import reloadData
+from .OFWriter import write_OpenFOAM
 from .podfs_functions import MyArgumentParser
 from .podfs_functions import addArguments
-import sys
+from .OpenFOAMVTK import readOpenFOAMVTK
+from .dataTypes import PATCH
+from .nickDigitalFilter import readDigitalFilterData
+from .utilities import cleanDir
+from .checkPODFSOutput import checkOutput 
 
 def main():
 
@@ -19,29 +30,63 @@ def main():
 
     inputs = parser.parse_args()
 
-    if inputs.readWholeCase:
+    readFormats = ['OpenFOAMVTK', 'DigitalFilter', 'resume']
+    writeFormats = ['OpenFOAM']
 
-        # Extract data from OpenFOAM Case
-        print( "Extracting data from case: " + inputs.caseDir )
+    if inputs.format == 'null':
+        sys.exit('format not specified, please specify a format for the input data')
+    elif inputs.format not in readFormats:
+        sys.exit('\"' + inputs.format + '\" is not a supported format, please specify a recognised input format')
 
-    if inputs.readSurfaces:
+    patches = list()
 
-        surfaceData = list()
+    if inputs.format == 'OpenFOAMVTK':
 
-        # Read data from surfaces output by OpenFOAM post processing
         for i in range(0, len(inputs.surfaces)):
 
-            print( "Reading data from surface: " + inputs.surfaces[i] )
+            patches.append( PATCH(inputs.surfaces[i]) )
 
-            surfaceData.append( RawData(inputs.surfaceDir, inputs.surfaces[i], inputs.vars) )
+            readOpenFOAMVTK(patches[i], inputs.vars, inputs.path)
 
-    if inputs.interpolate or inputs.translate or inputs.rotate:
+    elif inputs.format == 'DigitalFilter':
 
-        print( "Transforming data" )
+        patches.append( PATCH('inlet') )
 
-    if inputs.saveRawData:
+        readDigitalFilterData( patches[0], inputs.path )
 
-        if inputs.readSurfaces:
-            for i in range(len(surfaceData)):
-                print( "Saving raw data for surface: " + inputs.surfaces[i] )
-                surfaceData[i].write(inputs.rawDataDir + '/' + inputs.surfaces[i])
+    elif inputs.format == 'resume':
+
+        patches = reloadData(inputs.path)
+
+    A = list()
+
+    for i in range(0, len(patches)):
+        A.append(patches[i].createPODMatrix())
+
+    podfs = list()
+
+    for i in range(0, len(A)):
+        podfs.append( PODFS(A[i], A[i].shape[1], inputs.NM, inputs.dt, inputs.ET) )
+        podfs[i].run()
+
+    outputs = list()
+
+    for i in range(0, len(podfs)):
+        outputs.append(podfs[i].createOutput(patches[i]))
+
+    if inputs.writeFormat == "OpenFOAM":
+
+        for i in range(0, len(patches)):
+
+            patchWriteDir = inputs.writeDir + patches[i].patchName + "/"
+
+            if os.path.exists(patchWriteDir):
+                cleanDir(patchWriteDir)
+
+            else:
+                os.makedirs(patchWriteDir)
+
+            write_OpenFOAM(outputs[i], patchWriteDir)
+
+    if inputs.checkOutput:
+        checkOutput(outputs[i], inputs.nickDir)

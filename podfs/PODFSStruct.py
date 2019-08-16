@@ -3,64 +3,9 @@ import numpy.matlib
 import sys
 import os
 import math
-from utilities import writeFile
 
-class Mode:
-    def __init__(self,  b_ij, NF, spatialMode, energy ):
-
-        self.b_ij = b_ij
-        self.NF = NF
-        self.spatialMode = spatialMode
-        self.energy = energy
-
-    # def write(self, format, writeDir):
-
-class Modes:
-    def __init__(self, spatialModes, cInd, numFcs, c, NM, NF, period, energy, meanField):
-
-        self.modes = list()
-        self.period = period
-        self.NM = NM
-        self.meanField = meanField
-
-        for i in range(0,NM):
-
-            b_ij = np.array(np.zeros([ NF[i], 3 ]))
-
-            for j in range(0, NF[i]):
-
-                b_ij[j,0] = cInd[i,j] - numFcs/2
-
-                b_ij[j,1] = c[ cInd[i,j], i ].real
-
-                b_ij[j,2] = c[ cInd[i,j], i ].imag
-
-            spatialMode = spatialModes[:,i]
-
-            self.modes.append( Mode( b_ij, NF[i], spatialMode, energy[i] ) )
-
-    # def write(self, format, writeDir)
-    #
-    #     self.writeFormats = ["openfoam"]
-    #
-    #     if format not in self.writeFormats:
-    #
-    #         print "Unreconised write format specified. Please select from the following:"
-    #
-    #         for i in self.writeFormats:
-    #             print i
-    #
-    #         print
-    #
-    #         sys.exit()
-    #
-    #     for i in range(0, len(self.modes)):
-    #
-    #         modeNumber = "mode" + '{0:04d}'.format(i) + "/"
-    #
-    #         self.modes[i].write("openfoam", writeDir + modeNumber)
-    #
-    #     writeFile(writeDir + "meanField", self.meanField)
+from .utilities import writeFile
+from .OutputStruct import StandardOutput, Variable, Mode
 
 class PODFS:
 
@@ -224,8 +169,81 @@ class PODFS:
         self.truncateSpatialModes()
         self.fourierCoeffs()
 
-    def outputModes(self):
+    def createOutput(self, Patch):
 
-        modes = Modes(self.spatialModesTrunc, self.cInd, self.numFcs, self.c, self.NM, self.NF, self.period, self.energy, self.meanField)
+        print('createOutput called')
 
-        return modes
+        OUTPUT = StandardOutput()
+
+        if len(Patch.scalars) > 0:
+            nPoints = Patch.scalars[0].nPoints
+            OUTPUT.addCoordinates( Patch.scalars[0].times[0].points )
+        else:
+            nPoints = Patch.vectors[0].nPoints
+            OUTPUT.addCoordinates( Patch.vectors[0].times[0].points )
+
+        offset = 0
+
+        for i in range(0, len(Patch.scalars)):
+
+            tempVar = Variable(Patch.scalars[i].name, 'scalar')
+
+            startRow = i * nPoints
+            endRow = i * nPoints + nPoints
+
+            tempVar.addMeanField( self.meanField[startRow:endRow, 0] )
+
+            for m in range(0, self.NM):
+
+                b_ij = np.array(np.zeros( [self.NF[m], 3] ))
+
+                for j in range(0, self.NF[m]):
+
+                    b_ij[j,0] = self.cInd[m,j] - self.numFcs/2
+
+                    b_ij[j,1] = self.c[ self.cInd[m,j], m ].real
+
+                    b_ij[j,2] = self.c[ self.cInd[m,j], m ].imag
+
+                spatialMode = self.spatialModesTrunc[startRow:endRow, m]
+
+                tempMode = Mode( b_ij, self.NF[m], spatialMode, self.energy[m] )
+
+                tempVar.addMode( tempMode )
+
+            offset = endRow
+
+            OUTPUT.addVariable(tempVar)
+
+        for i in range(0, len(Patch.vectors)):
+
+            tempVar = Variable(Patch.vectors[i].name, 'vector')
+
+            startRow = offset + i * nPoints * 3
+            endRow = offset + i * nPoints * 3 + nPoints * 3
+
+            meanField = np.reshape(self.meanField[startRow:endRow], [-1,3], order='F')
+
+            tempVar.addMeanField(meanField)
+
+            for m in range(0, self.NM):
+
+                b_ij = np.array(np.zeros( [self.NF[m], 3] ))
+
+                for j in range(0, self.NF[m]):
+
+                    b_ij[j,0] = self.cInd[m,j] - self.numFcs/2
+
+                    b_ij[j,1] = self.c[ self.cInd[m,j], m ].real
+
+                    b_ij[j,2] = self.c[ self.cInd[m,j], m ].imag
+
+                spatialMode = np.reshape(self.spatialModesTrunc[startRow:endRow, m], [-1,3], order='F')
+
+                tempMode = Mode( b_ij, self.NF[m], spatialMode, self.energy[m] )
+
+                tempVar.addMode( tempMode )
+
+                OUTPUT.addVariable(tempVar)
+
+        return OUTPUT

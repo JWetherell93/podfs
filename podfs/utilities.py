@@ -12,6 +12,13 @@ def isInt(x):
     except ValueError:
         return False
 
+def isFloat(x):
+    try:
+        y = float(x)
+        return True
+    except ValueError:
+        return False
+
 def removeChars(text,chars):
     for c in chars:
         if c in text:
