@@ -213,6 +213,8 @@ class PODFS:
 
             offset = endRow
 
+            tempVar.addAlpha(1)
+
             OUTPUT.addVariable(tempVar)
 
         for i in range(0, len(Patch.vectors)):
@@ -244,6 +246,8 @@ class PODFS:
 
                 tempVar.addMode( tempMode )
 
-                OUTPUT.addVariable(tempVar)
+            tempVar.addAlpha(1)
+
+            OUTPUT.addVariable(tempVar)
 
         return OUTPUT

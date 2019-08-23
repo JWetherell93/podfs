@@ -27,6 +27,10 @@ class Variable:
 
         self.meanField = meanField
 
+    def addAlpha(self, alpha):
+
+        self.alpha = alpha
+
 class StandardOutput:
 
     def __init__(self):

@@ -13,7 +13,9 @@ from .OpenFOAMVTK import readOpenFOAMVTK
 from .dataTypes import PATCH
 from .nickDigitalFilter import readDigitalFilterData
 from .utilities import cleanDir
-from .checkPODFSOutput import checkOutput 
+from .checkPODFSOutput import checkOutput
+from .ReconstructionChecks import checkReconstruction
+from .alphaCalcs import calculateAlpha
 
 def main():
 
@@ -90,3 +92,8 @@ def main():
 
     if inputs.checkOutput:
         checkOutput(outputs[i], inputs.nickDir)
+
+    calculateAlpha(outputs, patches, inputs)
+
+    if inputs.checkReconstruction:
+        checkReconstruction(outputs, patches, inputs)

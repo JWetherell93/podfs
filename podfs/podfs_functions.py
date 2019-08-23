@@ -38,6 +38,8 @@ def addArguments(parser):
     parser.add_argument('--checkOutput', action='store_true', help='Check calculated output against NT digitalfilters output')
     parser.add_argument('--nickDir', type=str, help='Directory containing outputs from digitialfilter.py')
 
+    parser.add_argument('--checkReconstruction', action='store_true', help='Reconstruct each timestep and compare to raw data')
+
     # parser.add_argument('--readWholeCase', action='store_true', help='Read OpenFOAM case, and extract data')
     # parser.add_argument('--caseDir', type=str, help='Path to case directory')
     #

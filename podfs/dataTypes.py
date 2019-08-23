@@ -119,7 +119,6 @@ class VECTOR:
         a3 = np.array(np.zeros( [self.nPoints, NS] ))
 
         for i in range(0, NS):
-
             a1[:,i] = self.times[i].field[:,0]
             a2[:,i] = self.times[i].field[:,1]
             a3[:,i] = self.times[i].field[:,2]
@@ -149,6 +148,10 @@ class TIMESTEP:
     def __getitem__(self, index):
 
         return self.field[index]
+
+    def __len__(self):
+
+        return len(self.points)
 
     def write(self, writeDir):
 
