@@ -43,9 +43,9 @@ class PATCH:
 
     def write(self, writeDir):
 
-        folderName = writeDir + "/" + self.patchName
+        folderName = writeDir + self.patchName
 
-        if os.patch.exists(folderName):
+        if os.path.exists(folderName):
             cleanDir(folderName)
 
         else:
@@ -159,7 +159,7 @@ class TIMESTEP:
 
         os.makedirs(timeDir)
 
-        pointsFile = timeDir + "points"
+        pointsFile = timeDir + "/" + "points"
 
         with open(pointsFile, "w+") as file:
 
@@ -169,7 +169,7 @@ class TIMESTEP:
                 file.write( '{:F} '.format( self.points[i,1] ) )
                 file.write( '{:F}\n'.format( self.points[i,2] ) )
 
-        dataFile = timeDir + "data"
+        dataFile = timeDir + "/" + "data"
 
         with open(dataFile, "w+") as file:
 

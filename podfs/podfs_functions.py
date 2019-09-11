@@ -20,55 +20,65 @@ class MyArgumentParser(ArgumentParser):
 
 def addArguments(parser):
 
-    parser.add_argument('--format', type=str, default='null', help='Format of data to be read in')
+    parser.add_argument('-h', '--help', action='store_true')
 
-    parser.add_argument('--path', type=str, default='null', help='Location of input data. Should be in format expected by format specifier')
+    parser.add_argument('--format', type=str, default='null')
 
-    parser.add_argument('--vars', nargs='*', default='null', type=str, help='Variables to apply PODFS to')
+    parser.add_argument('--path', type=str, default='null')
 
-    parser.add_argument('--surfaces', nargs='*', type=str, help='List of surface names to read')
+    parser.add_argument('--vars', nargs='*', default='null', type=str)
 
-    parser.add_argument('--ET', type=float, help='Energy target for calculating which fourier modes to use')
-    parser.add_argument('--NM', type=int, help='Number of spatial modes to use')
-    parser.add_argument('--dt', type=float, help='Timestep of original calculation')
+    parser.add_argument('--surfaces', nargs='*', type=str)
 
-    parser.add_argument('--writeDir', type=str, help='Location to write output to')
-    parser.add_argument('--writeFormat', type=str, help='Format of output data')
+    parser.add_argument('--saveRawData', action='store_true')
+    parser.add_argument('--saveDir', type=str)
 
-    parser.add_argument('--checkOutput', action='store_true', help='Check calculated output against NT digitalfilters output')
-    parser.add_argument('--nickDir', type=str, help='Directory containing outputs from digitialfilter.py')
+    parser.add_argument('--ET', type=float, default=0.9)
+    parser.add_argument('--NM', type=int)
+    parser.add_argument('--dt', type=float)
 
-    parser.add_argument('--checkReconstruction', action='store_true', help='Reconstruct each timestep and compare to raw data')
+    parser.add_argument('--writeDir', type=str)
+    parser.add_argument('--writeFormat', type=str)
 
-    # parser.add_argument('--readWholeCase', action='store_true', help='Read OpenFOAM case, and extract data')
-    # parser.add_argument('--caseDir', type=str, help='Path to case directory')
-    #
-    # parser.add_argument('--readSurfaces', action='store_true', help='Readsurface VTK data output by OpenFOAM post processing')
-    # parser.add_argument('--surfaceDir', type=str, help='Path to surface data directory')
-    # parser.add_argument('--surfaces', nargs='*', type=str, help='List of surface names to read')
-    #
-    # parser.add_argument('--interpolate', action='store_true', help='Interpolate data onto new mesh')
-    #
-    # parser.add_argument('--translate', action='store_true', help='Translate points by specified vector')
-    #
-    # parser.add_argument('--rotate', action='store_true', help='Rotate points about point by specified vector')
-    #
-    # parser.add_argument('--saveRawData', action='store_true', help='Save pre-processed raw data')
-    # parser.add_argument('--rawDataDir', type=str, help='Directory to write pre-processed raw data to')
-    #
-    # parser.add_argument('--et', type=float, help='Energy target for calculating which fourier modes to use')
+    parser.add_argument('--checkOutput', action='store_true')
+    parser.add_argument('--nickDir', type=str)
+
+    parser.add_argument('--checkReconstruction', action='store_true')
 
     parser.description = textwrap.dedent('''\
+
+            Usage: podfs [options]
+
             Program for PODFS data compression. Pre-processor options available.
 
             Arguments can be given by file, using "@" before file name. For example
             "podfs @inputs.txt"
 
+            Required Arguments:
+                --format                Format of input data
+                --path                  Location of input data
+                --vars                  Variables on which to perform analysis
+
+                --nm                    Number of spatial modes to use
+                --dt                    Timestep of original calculation
+
             Optional Arguments:
-            -h, --help                  Show help message and exit
+                -h, --help              Show help message and exit
+
+                --surfaces              List of surface names
+
+                --saveRawData           Save pre-processed data prior to running analysis
+                --saveDir               Directory in which to save pre-processed data
+
+                --ET                    Energy target for calculation of Fourier Coefficients, default 0.9
+
+                --writeFormat           Format to write PODFS output in
+                --writeDir              Location to save PODFS output to
+
+                --checkOutput           Compare PODFS output to output from DigitalFiler.py
+                --nickDir               Location of digitalfilter.py output
+
+                --checkReconstruction   Compare each reconstructed timestep to the original snapshot and report mean
+                                        error
 
     ''')
-
-    # parser.add_help = False
-    #
-    # parser.formatter_class = argparse.RawDescriptionHelpFormatter

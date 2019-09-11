@@ -1,5 +1,7 @@
 import numpy as np
 import os
+from os import listdir
+from os.path import isfile, isdir, join
 
 from .dataTypes import PATCH, SCALAR, VECTOR, TIMESTEP
 from .constants import vectors
@@ -17,7 +19,7 @@ def reloadData(writeDir):
 
         Patches.append( PATCH(patches[i]) )
 
-        patchDir = writeDir + "/" + patches[i]
+        patchDir = writeDir + patches[i]
 
         vars = listdir(patchDir)
 
@@ -37,7 +39,7 @@ def reloadData(writeDir):
 
                 tempVar.addTimestep( TIMESTEP(times[j], data, points) )
 
-            Patches.addVector( tempVar )
+            Patches[i].addVector( tempVar )
 
         else:
 
@@ -55,7 +57,7 @@ def reloadData(writeDir):
 
                 tempVar.addTimestep( TIMESTEP(times[j], data, points) )
 
-            Patches.addScalar( tempVar )
+            Patches[i].addScalar( tempVar )
 
     return Patches
 
@@ -76,6 +78,6 @@ def readTime(timeDir):
         data[i] = data[i].split()
 
     points = np.array(points, np.float64)
-    data = np.array(data. np.float64)
+    data = np.array(data, np.float64)
 
     return points, data

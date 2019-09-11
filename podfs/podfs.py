@@ -14,7 +14,6 @@ from .dataTypes import PATCH
 from .nickDigitalFilter import readDigitalFilterData
 from .utilities import cleanDir
 from .checkPODFSOutput import checkOutput
-from .ReconstructionChecks import checkReconstruction
 from .alphaCalcs import calculateAlpha
 
 def main():
@@ -31,6 +30,10 @@ def main():
     addArguments(parser)
 
     inputs = parser.parse_args()
+
+    if inputs.help:
+        print(parser.description)
+        return
 
     readFormats = ['OpenFOAMVTK', 'DigitalFilter', 'resume']
     writeFormats = ['OpenFOAM']
@@ -59,6 +62,11 @@ def main():
     elif inputs.format == 'resume':
 
         patches = reloadData(inputs.path)
+
+    if inputs.saveRawData:
+
+        for i in range(0, len(patches)):
+            patches[i].write(inputs.saveDir)
 
     A = list()
 
@@ -94,6 +102,3 @@ def main():
         checkOutput(outputs[i], inputs.nickDir)
 
     calculateAlpha(outputs, patches, inputs)
-
-    if inputs.checkReconstruction:
-        checkReconstruction(outputs, patches, inputs)
