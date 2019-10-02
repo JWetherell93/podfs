@@ -1,94 +1,67 @@
-import argparse
-from argparse import ArgumentParser
-import sys
-import numpy as np
 import os
+import textwrap
 
-from .PODFSStruct import PODFS
-from .restart import reloadData
-from .OFWriter import write_OpenFOAM
-from .podfs_functions import MyArgumentParser
-from .podfs_functions import addArguments
-from .OpenFOAMVTK import readOpenFOAMVTK
+from .podfs_functions import getParser, checkInputs, printStuff
 from .dataTypes import PATCH
+from .OpenFOAMVTK import readOpenFOAMVTK
 from .nickDigitalFilter import readDigitalFilterData
+from .restart import reloadData
+from .PODFSStruct import PODFS
 from .utilities import cleanDir
+from .OFWriter import write_OpenFOAM
 from .checkPODFSOutput import checkOutput
 from .alphaCalcs import calculateAlpha
 
 def main():
 
-    parser = MyArgumentParser(
-                            prog = 'podfs',
-                            usage = '%(prog)s [options]',
-                            description = 'Script for PODFS data compression, including pre-processor options',
-                            fromfile_prefix_chars = '@',
-                            formatter_class=argparse.RawDescriptionHelpFormatter,
-                            add_help=False,
-                            )
-
-    addArguments(parser)
+    parser = getParser()
 
     inputs = parser.parse_args()
 
     if inputs.help:
+        printStuff()
         print(parser.description)
         return
 
-    readFormats = ['OpenFOAMVTK', 'DigitalFilter', 'resume']
-    writeFormats = ['OpenFOAM']
+    checkInputs(inputs)
 
-    if inputs.format == 'null':
-        sys.exit('format not specified, please specify a format for the input data')
-    elif inputs.format not in readFormats:
-        sys.exit('\"' + inputs.format + '\" is not a supported format, please specify a recognised input format')
+    for i in range(0, len(inputs.surfaces)):
 
-    patches = list()
+        print('------------------------')
+        print('    SURFACE: ' + inputs.surfaces[i])
+        print('------------------------ \n')
 
-    if inputs.format == 'OpenFOAMVTK':
+        print('READING DATA... ')
 
-        for i in range(0, len(inputs.surfaces)):
+        if inputs.format == 'OpenFOAMVTK':
+            patch = PATCH(inputs.surfaces[i])
+            readOpenFOAMVTK(patch, inputs.vars, inputs.path)
 
-            patches.append( PATCH(inputs.surfaces[i]) )
+        elif inputs.format == 'DigitalFilter':
+            patch = PATCH('inlet')
+            readDigitalFilterData( patch, inputs.path )
 
-            readOpenFOAMVTK(patches[i], inputs.vars, inputs.path)
+        elif inputs.format == 'resume':
+            patch = reloadData(inputs.path, inputs.surfaces[i])
 
-    elif inputs.format == 'DigitalFilter':
+        if inputs.saveRawData:
+            print('\n SAVING DATA...')
+            patch.write(inputs.saveDir)
 
-        patches.append( PATCH('inlet') )
+        print('\nRUNNING PODFS ANALYSIS...')
 
-        readDigitalFilterData( patches[0], inputs.path )
+        A = patch.createPODMatrix()
 
-    elif inputs.format == 'resume':
+        podfs = PODFS(A, A.shape[1], inputs)
+        podfs.run()
 
-        patches = reloadData(inputs.path)
+        output = podfs.createOutput(patch)
 
-    if inputs.saveRawData:
+        print('\nWRITING DATA...')
 
-        for i in range(0, len(patches)):
-            patches[i].write(inputs.saveDir)
+        if inputs.writeFormat == "OpenFOAM":
 
-    A = list()
-
-    for i in range(0, len(patches)):
-        A.append(patches[i].createPODMatrix())
-
-    podfs = list()
-
-    for i in range(0, len(A)):
-        podfs.append( PODFS(A[i], A[i].shape[1], inputs.NM, inputs.dt, inputs.ET) )
-        podfs[i].run()
-
-    outputs = list()
-
-    for i in range(0, len(podfs)):
-        outputs.append(podfs[i].createOutput(patches[i]))
-
-    if inputs.writeFormat == "OpenFOAM":
-
-        for i in range(0, len(patches)):
-
-            patchWriteDir = inputs.writeDir + patches[i].patchName + "/"
+            patchWriteDir = inputs.writeDir + patch.patchName + "/"
 
             if os.path.exists(patchWriteDir):
                 cleanDir(patchWriteDir)
@@ -96,9 +69,16 @@ def main():
             else:
                 os.makedirs(patchWriteDir)
 
-            write_OpenFOAM(outputs[i], patchWriteDir)
+            write_OpenFOAM(output, patchWriteDir)
 
-    if inputs.checkOutput:
-        checkOutput(outputs[i], inputs.nickDir)
+        if inputs.checkOutput:
 
-    calculateAlpha(outputs, patches, inputs)
+            print('\nCHECKING OUTPUT...')
+
+            checkOutput(output, inputs.nickDir)
+
+        print('\nCALCULATING ALPHA...')
+
+        calculateAlpha(output, patch, inputs)
+
+    print('\nANALYSIS COMPLETED\n')

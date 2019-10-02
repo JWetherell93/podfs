@@ -101,21 +101,21 @@ def compareSpatialModes(mode1, mode2):
 
     tol = 1e-5
 
-    # for i in range(0, len(mode1)):
-    #     if abs(abs(mode1[i,0]) - abs(mode2[i,0])) > tol:
-    #         error = False
-    #     if abs(abs(mode1[i,1]) - abs(mode2[i,1])) > tol:
-    #         error = False
-    #     if abs(abs(mode1[i,2]) - abs(mode2[i,2])) > tol:
-    #         error = False
-
     for i in range(0, len(mode1)):
-        if abs(mode1[i,0] - mode2[i,0]) > tol:
+        if abs(abs(mode1[i,0]) - abs(mode2[i,0])) > tol:
             error = False
-        if abs(mode1[i,1] - mode2[i,1]) > tol:
+        if abs(abs(mode1[i,1]) - abs(mode2[i,1])) > tol:
             error = False
-        if abs(mode1[i,2] - mode2[i,2]) > tol:
+        if abs(abs(mode1[i,2]) - abs(mode2[i,2])) > tol:
             error = False
+
+    # for i in range(0, len(mode1)):
+    #     if abs(mode1[i,0] - mode2[i,0]) > tol:
+    #         error = False
+    #     if abs(mode1[i,1] - mode2[i,1]) > tol:
+    #         error = False
+    #     if abs(mode1[i,2] - mode2[i,2]) > tol:
+    #         error = False
 
     return error
 
@@ -125,20 +125,20 @@ def compareFourierModes(mode1, mode2):
 
     tol = 1e-5
 
-    # for i in range(0, mode1.NF):
-    #     if abs(abs(mode1.b_ij[i,0]) - abs(mode2.b_ij[i,0])) > tol:
-    #         error = False
-    #     if abs(abs(mode1.b_ij[i,1]) - abs(mode2.b_ij[i,1])) > tol:
-    #         error = False
-    #     if abs(abs(mode1.b_ij[i,2]) - abs(mode2.b_ij[i,2])) > tol:
-    #         error = False
-
     for i in range(0, mode1.NF):
-        if abs(mode1.b_ij[i,0] - mode2.b_ij[i,0]) > tol:
+        if abs(abs(mode1.b_ij[i,0]) - abs(mode2.b_ij[i,0])) > tol:
             error = False
-        if abs(mode1.b_ij[i,1] - mode2.b_ij[i,1]) > tol:
+        if abs(abs(mode1.b_ij[i,1]) - abs(mode2.b_ij[i,1])) > tol:
             error = False
-        if abs(mode1.b_ij[i,2] - mode2.b_ij[i,2]) > tol:
+        if abs(abs(mode1.b_ij[i,2]) - abs(mode2.b_ij[i,2])) > tol:
             error = False
+
+    # for i in range(0, mode1.NF):
+    #     if abs(mode1.b_ij[i,0] - mode2.b_ij[i,0]) > tol:
+    #         error = False
+    #     if abs(mode1.b_ij[i,1] - mode2.b_ij[i,1]) > tol:
+    #         error = False
+    #     if abs(mode1.b_ij[i,2] - mode2.b_ij[i,2]) > tol:
+    #         error = False
 
     return error

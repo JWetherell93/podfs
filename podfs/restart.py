@@ -5,61 +5,68 @@ from os.path import isfile, isdir, join
 
 from .dataTypes import PATCH, SCALAR, VECTOR, TIMESTEP
 from .constants import vectors
+from .utilities import printProgressBar
 
-def reloadData(writeDir):
+def reloadData(writeDir, patchName):
 
     patches = [f for f in listdir(writeDir) if isdir(join(writeDir, f))]
 
-    Patches = list()
-
     if patches == []:
         sys.exit("No folders found in specified location, please double check")
+    if patchName not in patches:
+        sys.exit("Requested patch " + patchName + " not found in specified location, please double check")
 
-    for i in range(0, len(patches)):
+    Patch = PATCH(patchName)
 
-        Patches.append( PATCH(patches[i]) )
+    patchDir = writeDir + patchName
 
-        patchDir = writeDir + patches[i]
+    vars = listdir(patchDir)
 
-        vars = listdir(patchDir)
+    if vars[i] in vectors:
 
-        if vars[i] in vectors:
+        print('Reading variable ' + vars[i])
 
-            tempVar = VECTOR(vars[i])
+        tempVar = VECTOR(vars[i])
 
-            varDir = patchDir + "/" + vars[i]
+        varDir = patchDir + "/" + vars[i]
 
-            times = [f for f in listdir(varDir) if isdir(join(varDir, f))]
+        times = [f for f in listdir(varDir) if isdir(join(varDir, f))]
 
-            for j in range(0, len(times)):
+        for j in range(0, len(times)):
 
-                timeDir = varDir + "/" + times[j]
+            timeDir = varDir + "/" + times[j]
 
-                points, data = readTime(timeDir)
+            points, data = readTime(timeDir)
 
-                tempVar.addTimestep( TIMESTEP(times[j], data, points) )
+            tempVar.addTimestep( TIMESTEP(times[j], data, points) )
 
-            Patches[i].addVector( tempVar )
+            printProgressBar(j, len(times)-1)
 
-        else:
+        Patch.addVector( tempVar )
 
-            tempVar = SCALAR(vars[i])
+    else:
 
-            varDir = patchDir + "/" + vars[i]
+        print('Reading variable ' + vars[i])
 
-            times = [f for f in listdir(varDir) if isdir(join(varDir, f))]
+        tempVar = SCALAR(vars[i])
 
-            for j in range(0, len(times)):
+        varDir = patchDir + "/" + vars[i]
 
-                timeDir = varDir + "/" + times[j]
+        times = [f for f in listdir(varDir) if isdir(join(varDir, f))]
 
-                points, data = readTime(timeDir)
+        for j in range(0, len(times)):
 
-                tempVar.addTimestep( TIMESTEP(times[j], data, points) )
+            timeDir = varDir + "/" + times[j]
 
-            Patches[i].addScalar( tempVar )
+            points, data = readTime(timeDir)
 
-    return Patches
+            tempVar.addTimestep( TIMESTEP(times[j], data, points) )
+
+            printProgressBar(j,len(times)-1)
+
+        Patch.addScalar( tempVar )
+
+    return Patch
 
 def readTime(timeDir):
 

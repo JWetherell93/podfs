@@ -2,7 +2,7 @@ import numpy as np
 import sys
 import os
 
-from .utilities import cleanDir, writeFoamHeader
+from .utilities import cleanDir, writeFoamHeader, printProgressBar
 
 def write_OpenFOAM(OUTPUT, writeDir):
 
@@ -17,6 +17,8 @@ def write_OpenFOAM(OUTPUT, writeDir):
         var = OUTPUT.vars[i]
 
         varDir = writeDir + var.name + '/'
+
+        print('Writing PODFS data for variable: ' + var.name)
 
         if var.type == 'scalar':
             writeScalarSpatialMode(varDir, "meanField", var.meanField, nPoints, True)
@@ -34,6 +36,8 @@ def write_OpenFOAM(OUTPUT, writeDir):
 
             #print(var.modes[j].NF)
             writeVectorSpatialMode(modeDir, "fourierCoeffs", var.modes[j].b_ij, var.modes[j].NF, False)
+
+            printProgressBar(j, len(var.modes)-1)
 
 
 def makeFolderTree(OUTPUT, writeDir):
@@ -68,7 +72,7 @@ def writeScalarSpatialMode(modeDir, filename, data, nPoints, header):
 
         for i in range(0, nPoints):
 
-            spatialFile.write('{:F}\n'.format(data[i]))
+            spatialFile.write('{:.12F}\n'.format(data[i]))
 
         spatialFile.write(")")
 
@@ -86,8 +90,8 @@ def writeVectorSpatialMode(modeDir, filename, data, nPoints, header):
 
         for i in range(0, nPoints):
 
-            spatialFile.write('({:F} '.format(data[i, 0]))
-            spatialFile.write('{:F} '.format(data[i,1]))
-            spatialFile.write('{:F})\n'.format(data[i,2]))
+            spatialFile.write('({:.12F} '.format(data[i, 0]))
+            spatialFile.write('{:.12F} '.format(data[i,1]))
+            spatialFile.write('{:.12F})\n'.format(data[i,2]))
 
         spatialFile.write(")")

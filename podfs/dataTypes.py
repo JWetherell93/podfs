@@ -1,7 +1,7 @@
 import numpy as np
 import os
 
-from .utilities import removeDir, removeFile, cleanDir
+from .utilities import removeDir, removeFile, cleanDir, printProgressBar
 
 class PATCH:
 
@@ -91,8 +91,11 @@ class SCALAR:
 
         os.makedirs(folderName)
 
+        print('Writing variable: ' + self.name)
+
         for i in range(0, len(self.times)):
             self.times[i].write(folderName)
+            printProgressBar(i, len(self.times)-1)
 
 class VECTOR:
 
@@ -134,8 +137,11 @@ class VECTOR:
 
         os.makedirs(folderName)
 
+        print('Writing variable: ' + self.name)
+
         for i in range(0, len(self.times)):
             self.times[i].write(folderName)
+            printProgressBar(i, len(self.times)-1)
 
 class TIMESTEP:
 

@@ -3,19 +3,22 @@ import numpy.matlib
 import sys
 import os
 import math
+from math import pi
+from matplotlib import pyplot as plt
 
 from .utilities import writeFile
 from .OutputStruct import StandardOutput, Variable, Mode
 
 class PODFS:
 
-    def __init__(self, A, nTimesteps, nModes, dt, energyTarget):
+    def __init__(self, A, nTimesteps, inputs):
 
         self.A = A
         self.NS = int(nTimesteps)
-        self.NM = int(nModes)
-        self.dt = dt
-        self.ET = energyTarget
+        self.NM = int(inputs.nMax)
+        self.dt = inputs.dt
+        self.EFS = inputs.EFS
+        self.EPOD = inputs.EPOD
 
     def getFluctuatingComponent(self):
 
@@ -93,6 +96,19 @@ class PODFS:
 
         self.numValidModes = numValidModes
 
+        cumEnergy = np.cumsum(self.energy)
+
+        cumFracEnergy = cumEnergy / np.sum(self.energy)
+
+        for i in range(0, len(cumEnergy)):
+            if cumFracEnergy[i] > self.EPOD:
+                reqdModes = i
+                break
+
+        self.NM = min(reqdModes, self.NM)
+
+        print("Using " + '{0}'.format(self.NM) + " modes, capturing " + '{:.2F}'.format(cumFracEnergy[reqdModes]*100) + "% of TKE")
+
     def scaleTemporalModes(self):
 
         for i in range(0, self.numValidModes):
@@ -147,11 +163,26 @@ class PODFS:
 
             NF[i] = 0
 
-            while energy < energySum * self.ET:
+            while energy < energySum * self.EFS:
                 energy += np.abs( c[ cInd[ i, NF[i] ], i ] )
                 NF[i] += 1
 
             print( "Fourier Coeffs for Mode " + str(i) + ": " + str(NF[i]) )
+
+            # temporalMode = np.array(np.zeros(np.shape(time)), complex)
+            # ii = 0
+            # for t in time:
+            #     for j in range(0, NF[i]):
+            #         fj = cInd[i,j] - numFcs/2
+            #         exponent = complex(0,2*pi*fj*t/period)
+            #         temporalMode[ii] += complex(c[ cInd[i,j], i ].real, c[ cInd[i,j], i ].imag) * np.exp(exponent)
+            #     ii += 1
+
+            # plt.plot(time, y)
+            # plt.plot(time, temporalMode)
+            # plt.legend(('Original', 'Reconstructed'))
+            # plt.savefig('temporalModes/' + '{0:04d}'.format(i) + '_temporalMode.png')
+            # plt.clf()
 
         self.cInd = cInd
         self.numFcs = numFcs
@@ -170,8 +201,6 @@ class PODFS:
         self.fourierCoeffs()
 
     def createOutput(self, Patch):
-
-        print('createOutput called')
 
         OUTPUT = StandardOutput()
 

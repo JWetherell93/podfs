@@ -9,3 +9,5 @@
 /*.egg
 
 testInput
+*.bak
+*.gz

@@ -5,7 +5,7 @@ from os.path import isfile, join, isdir
 import errno
 
 from .dataTypes import SCALAR, VECTOR, TIMESTEP
-from .utilities import removeChars, cleanDir, writeFile, writeVectorFile
+from .utilities import removeChars, cleanDir, writeFile, writeVectorFile, printProgressBar
 
 def readOpenFOAMVTK(case, vars, path):
 
@@ -17,6 +17,8 @@ def readOpenFOAMVTK(case, vars, path):
 
     for i in range(0, len(vars) ):
 
+        print('Reading variable ' + vars[i])
+
         if vars[i] in vectors:
             tempVar = VECTOR(vars[i])
 
@@ -27,11 +29,13 @@ def readOpenFOAMVTK(case, vars, path):
 
         for j in range(0, len(times) ):
 
-            fullFile = path + "/" + times[j] + "/" + fileName
+            fullFile = path + times[j] + "/" + fileName
 
             points, varData = readAsciiVTK(fullFile)
 
             tempVar.addTimestep( TIMESTEP(times[j], varData, points) )
+
+            printProgressBar(j, len(times)-1)
 
         if vars[i] in vectors:
             case.addVector(tempVar)
