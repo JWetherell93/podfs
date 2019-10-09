@@ -11,6 +11,7 @@ from .utilities import cleanDir
 from .OFWriter import write_OpenFOAM
 from .checkPODFSOutput import checkOutput
 from .alphaCalcs import calculateAlpha
+from .interpolation import interpolateModes
 
 def main():
 
@@ -80,5 +81,11 @@ def main():
         print('\nCALCULATING ALPHA...')
 
         calculateAlpha(output, patch, inputs)
+
+        if inputs.interpolateModes:
+
+            print ('\nINTERPOLATING MODES...')
+
+            interpolateModes(output, inputs)
 
     print('\nANALYSIS COMPLETED\n')

@@ -60,6 +60,9 @@ def getParser():
 
     parser.add_argument('--checkReconstruction', action='store_true')
 
+    parser.add_argument('--interpolateModes', action='store_true')
+    parser.add_argument('--newPointsFile', type=str)
+
     parser.description = textwrap.dedent('''\
 
             Usage: podfs [options]
@@ -95,6 +98,9 @@ def getParser():
 
                 --checkReconstruction   Compare each reconstructed timestep to the original snapshot and report mean
                                         error
+
+                --interpolateModes      Interpolate calculated spatial modes onto a provided new grid
+                --newPointsFile         File containing points to interpolate spatial modes onto
 
     ''')
 
