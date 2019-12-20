@@ -4,9 +4,11 @@ import os
 
 from .utilities import cleanDir, writeFoamHeader, printProgressBar
 
-def write_OpenFOAM(OUTPUT, writeDir):
+def write_OpenFOAM(OUTPUT, writeDir, PATCH, PODFS):
 
     makeFolderTree(OUTPUT, writeDir)
+
+    writeBoundaryConditions(OUTPUT, writeDir, PATCH, PODFS)
 
     nPoints = len(OUTPUT.coords[:,0])
 
@@ -30,9 +32,9 @@ def write_OpenFOAM(OUTPUT, writeDir):
             modeDir = varDir + "mode" + '{0:04d}'.format(j) + "/"
 
             if var.type == 'scalar':
-                writeScalarSpatialMode(modeDir, "spatialMode", var.modes[j].spatialMode, nPoints, True)
+                writeScalarSpatialMode(modeDir, "spatialMode", var.modes[j].spatialMode, nPoints, False)
             else:
-                writeVectorSpatialMode(modeDir, "spatialMode", var.modes[j].spatialMode, nPoints, True)
+                writeVectorSpatialMode(modeDir, "spatialMode", var.modes[j].spatialMode, nPoints, False)
 
             #print(var.modes[j].NF)
             writeVectorSpatialMode(modeDir, "fourierCoeffs", var.modes[j].b_ij, var.modes[j].NF, False)
@@ -95,3 +97,19 @@ def writeVectorSpatialMode(modeDir, filename, data, nPoints, header):
             spatialFile.write('{:.12F})\n'.format(data[i,2]))
 
         spatialFile.write(")")
+
+def writeBoundaryConditions(OUTPUT, writeDir, PATCH, PODFS):
+
+    for i in range(0, len(OUTPUT.vars)):
+
+        var = OUTPUT.vars[i]
+
+        with open(writeDir + "boundary_" + var.name, 'w') as boundaryFile:
+
+            boundaryFile.write(PATCH.patchName + "\n")
+            boundaryFile.write("{\n")
+            boundaryFile.write("\ttype\t\tpodfs;\n")
+            boundaryFile.write("\tNM\t\t" + str(len(var.modes)) + ";\n")
+            boundaryFile.write("\tNS\t\t" + str(PODFS.NS) + ";\n")
+            boundaryFile.write("\tperiod\t\t" + str(PODFS.period) + ";\n")
+            boundaryFile.write("}")

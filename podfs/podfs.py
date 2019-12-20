@@ -7,11 +7,12 @@ from .OpenFOAMVTK import readOpenFOAMVTK
 from .nickDigitalFilter import readDigitalFilterData
 from .restart import reloadData
 from .PODFSStruct import PODFS
-from .utilities import cleanDir
+from .transformations import transform
 from .OFWriter import write_OpenFOAM
 from .checkPODFSOutput import checkOutput
 from .alphaCalcs import calculateAlpha
 from .interpolation import interpolateModes
+from .utilities import cleanDir
 
 def main():
 
@@ -58,6 +59,12 @@ def main():
 
         output = podfs.createOutput(patch)
 
+        print('\nTRANSFORMING POINTS...')
+
+        if inputs.transformPoints:
+
+            transform(output, inputs)
+
         print('\nWRITING DATA...')
 
         if inputs.writeFormat == "OpenFOAM":
@@ -70,7 +77,7 @@ def main():
             else:
                 os.makedirs(patchWriteDir)
 
-            write_OpenFOAM(output, patchWriteDir)
+            write_OpenFOAM(output, patchWriteDir, patch, podfs)
 
         if inputs.checkOutput:
 

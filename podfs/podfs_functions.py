@@ -63,6 +63,12 @@ def getParser():
     parser.add_argument('--interpolateModes', action='store_true')
     parser.add_argument('--newPointsFile', type=str)
 
+    parser.add_argument('--transformPoints', action='store_true')
+    parser.add_argument('--translation', nargs=3, type=float)
+    parser.add_argument('--rotation', nargs=3, type=float)
+    parser.add_argument('--mirrorNormal', nargs=3, type=int)
+    parser.add_argument('--mirrorCentre', type=float)
+
     parser.description = textwrap.dedent('''\
 
             Usage: podfs [options]
@@ -101,6 +107,15 @@ def getParser():
 
                 --interpolateModes      Interpolate calculated spatial modes onto a provided new grid
                 --newPointsFile         File containing points to interpolate spatial modes onto
+
+                --transformPoints       Transform the spatial coordinates. Translation, rotation and mirroring
+                                        currently supported. At least one must be specified.
+                --translation           Vector by which to translate coordinates
+                --rotation              Angles by which to rotate coordinates, in degrees. 3 values required. First
+                                        value rotation about x axis, second about y and third about z.
+                --mirrorNormal          Unit vector specifying direction to mirror in. Currently only cartesian
+                                        directions supported.
+                --mirrorCentre          Scalar value that locates the plane to mirror points
 
     ''')
 
@@ -175,3 +190,15 @@ def checkInputs(inputs):
     if inputs.nickDir is not None:
         if not inputs.nickDir[-1] == '/':
             inputs.nickDir += '/'
+
+    # Check that transformation specified if transformPoints option used
+    if inputs.transformPoints:
+        if inputs.translation is not None:
+            __=1
+        elif inputs.rotation is not None:
+            __=1
+        elif inputs.mirrorNormal is not None and inputs.mirrorCentre is not None:
+            __=1
+        else:
+            print('ERROR:')
+            sys.exit('transformPoints option selected, but no transformation provided')
