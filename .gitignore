@@ -11,3 +11,5 @@
 testInput
 *.bak
 *.gz
+surfaces
+surfaces/*

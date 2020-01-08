@@ -6,6 +6,7 @@ from .dataTypes import PATCH
 from .OpenFOAMVTK import readOpenFOAMVTK
 from .nickDigitalFilter import readDigitalFilterData
 from .restart import reloadData
+from .preProcessing import cutData
 from .PODFSStruct import PODFS
 from .transformations import transform
 from .OFWriter import write_OpenFOAM
@@ -49,6 +50,11 @@ def main():
         if inputs.saveRawData:
             print('\n SAVING DATA...')
             patch.write(inputs.saveDir)
+
+        print('\nPRE-PROCESSING...')
+
+        if inputs.cutData:
+            cutData(patch, inputs)
 
         print('\nRUNNING PODFS ANALYSIS...')
 

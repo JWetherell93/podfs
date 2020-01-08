@@ -47,6 +47,14 @@ def getParser():
     parser.add_argument('--saveRawData', action='store_true')
     parser.add_argument('--saveDir', type=str)
 
+    parser.add_argument('--cutData', action='store_true')
+    parser.add_argument('--xLow', type=float)
+    parser.add_argument('--xHigh', type=float)
+    parser.add_argument('--yLow', type=float)
+    parser.add_argument('--yHigh', type=float)
+    parser.add_argument('--zLow', type=float)
+    parser.add_argument('--zHigh', type=float)
+
     parser.add_argument('--EPOD', type=float, default=0.95)
     parser.add_argument('--EFS', type=float, default=0.9)
     parser.add_argument('--nMax', type=int, default=-1)
@@ -92,6 +100,13 @@ def getParser():
 
                 --saveRawData           Save pre-processed data prior to running analysis
                 --saveDir               Directory in which to save pre-processed data
+
+                --cutData               Use a subset of the provided data. Currently only available for planar
+                                        input data.
+                --xLow                  X-coordinate below which to remove data. Use "yLow" and "zLow" for other
+                                        coordinates.
+                --xHigh                 X-coordinate above which to remove data. Use "yHigh" and "zHigh" for other
+                                        coordinates.
 
                 --EPOD                  Desired energy content for POD modes, default 0.95
                 --EFS                   Desired energy content for Fourier series, default 0.9
@@ -202,3 +217,24 @@ def checkInputs(inputs):
         else:
             print('ERROR:')
             sys.exit('transformPoints option selected, but no transformation provided')
+
+    # Check at least one cut limit specified, and set all empty ones to +/- infinity
+    if inputs.cutData:
+
+        if not (inputs.xLow or inputs.xHigh or inputs.yLow or inputs.yHigh or inputs.zLow or inputs.zHigh):
+            print('Error: ')
+            sys.exit('cutData option used, but no limits supplied for cut')
+
+        else:
+            if inputs.xLow is None:
+                inputs.xLow = float('-inf')
+            if inputs.xHigh is None:
+                inputs.xHigh = float('inf')
+            if inputs.yLow is None:
+                inputs.yLow = float('-inf')
+            if inputs.yHigh is None:
+                inputs.yHigh = float('inf')
+            if inputs.zLow is None:
+                inputs.zLow = float('-inf')
+            if inputs.zHigh is None:
+                inputs.zHigh = float('inf')
