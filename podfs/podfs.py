@@ -4,7 +4,7 @@ import textwrap
 from .podfs_functions import getParser, checkInputs, printStuff
 from .dataTypes import PATCH
 from .OpenFOAMVTK import readOpenFOAMVTK
-from .nickDigitalFilter import readDigitalFilterData
+from .nickDigitalFilter import readPreCalcDFData
 from .restart import reloadData
 from .preProcessing import cutData
 from .PODFSStruct import PODFS
