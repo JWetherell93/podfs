@@ -1,0 +1,13 @@
+--path /home/ttjrjw2/TestData/
+--format DigitalFilter
+
+--vars U
+
+--ET 0.9
+--NM 20
+--dt 0.5424550358472517
+
+--checkOutput
+--nickDir /home/ttjrjw2/TestData/
+
+--checkReconstruction
