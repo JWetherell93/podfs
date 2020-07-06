@@ -11,6 +11,10 @@ class PATCH:
         self.vectors = list()
         self.patchName = patch
 
+    def addPoints(self, points):
+
+        self.points = points
+
     def addScalar(self, scalar):
 
         self.scalars.append(scalar)
@@ -23,7 +27,7 @@ class PATCH:
 
         NS = len( self.vectors[0].times )
         nVars = len(self.scalars) + len(self.vectors)
-        nPoints = len( self.vectors[0][0].points )
+        nPoints = len( self.points )
 
         if len(self.scalars) > 0:
             A = self.scalars[0].createVariableMatrix()
@@ -51,6 +55,16 @@ class PATCH:
         else:
             os.makedirs(folderName)
 
+        pointsFile = folderName + "/" + "points"
+
+        with open(pointsFile, "w+") as file:
+
+            for i in range(0, len(self.points)):
+
+                file.write( '{:F} '.format( self.points[i,0] ) )
+                file.write( '{:F} '.format( self.points[i,1] ) )
+                file.write( '{:F}\n'.format( self.points[i,2] ) )
+
         for i in range(0, len(self.scalars)):
             self.scalars[i].write(folderName)
 
@@ -74,7 +88,7 @@ class SCALAR:
 
     def createVariableMatrix(self):
 
-        self.nPoints = len( self.times[0].points )
+        self.nPoints = len( self.times[0].field )
         NS = len(self.times)
 
         a = np.array(np.zeros( [self.nPoints, NS] ))
@@ -114,7 +128,7 @@ class VECTOR:
 
     def createVariableMatrix(self):
 
-        self.nPoints = len( self.times[0].points )
+        self.nPoints = len( self.times[0].field )
         NS = len(self.times)
 
         a1 = np.array(np.zeros( [self.nPoints, NS] ))
@@ -145,11 +159,10 @@ class VECTOR:
 
 class TIMESTEP:
 
-    def __init__(self, time, field, points):
+    def __init__(self, time, field):
 
         self.time = time
         self.field = field
-        self.points = points
 
     def __getitem__(self, index):
 
@@ -157,7 +170,7 @@ class TIMESTEP:
 
     def __len__(self):
 
-        return len(self.points)
+        return len(self.field)
 
     def write(self, writeDir):
 
@@ -165,15 +178,7 @@ class TIMESTEP:
 
         os.makedirs(timeDir)
 
-        pointsFile = timeDir + "/" + "points"
 
-        with open(pointsFile, "w+") as file:
-
-            for i in range(0, len(self.points)):
-
-                file.write( '{:F} '.format( self.points[i,0] ) )
-                file.write( '{:F} '.format( self.points[i,1] ) )
-                file.write( '{:F}\n'.format( self.points[i,2] ) )
 
         dataFile = timeDir + "/" + "data"
 

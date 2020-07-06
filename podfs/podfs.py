@@ -1,7 +1,7 @@
 import os
 import textwrap
 
-from .podfs_functions import getParser, checkInputs, printStuff
+from .programInputs import getParser, checkInputs, printStuff
 from .dataTypes import PATCH
 from .OpenFOAMVTK import readOpenFOAMVTK
 from .nickDigitalFilter import readPreCalcDFData
@@ -40,9 +40,9 @@ def main():
             patch = PATCH(inputs.surfaces[i])
             readOpenFOAMVTK(patch, inputs.vars, inputs.path)
 
-        elif inputs.format == 'DigitalFilter':
+        elif inputs.format == 'PreCalcDF':
             patch = PATCH('inlet')
-            readDigitalFilterData( patch, inputs.path )
+            readPreCalcDFData( patch, inputs.path )
 
         elif inputs.format == 'resume':
             patch = reloadData(inputs.path, inputs.surfaces[i])

@@ -204,12 +204,8 @@ class PODFS:
 
         OUTPUT = StandardOutput()
 
-        if len(Patch.scalars) > 0:
-            nPoints = Patch.scalars[0].nPoints
-            OUTPUT.addCoordinates( Patch.scalars[0].times[0].points )
-        else:
-            nPoints = Patch.vectors[0].nPoints
-            OUTPUT.addCoordinates( Patch.vectors[0].times[0].points )
+        nPoints = len(Patch.points)
+        OUTPUT.addCoordinates( Patch.points )
 
         offset = 0
 

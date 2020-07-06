@@ -6,14 +6,13 @@ import errno
 
 from .dataTypes import SCALAR, VECTOR, TIMESTEP
 from .utilities import removeChars, cleanDir, writeFile, writeVectorFile, printProgressBar
+from .constants import vectors
 
-def readOpenFOAMVTK(case, vars, path):
+def readOpenFOAMVTK(patch, vars, path):
 
     times = [f for f in listdir(path) if isdir(join(path, f))]
 
     times.sort(key=float)
-
-    vectors = ['U']
 
     for i in range(0, len(vars) ):
 
@@ -25,38 +24,48 @@ def readOpenFOAMVTK(case, vars, path):
         else:
             tempVar = SCALAR(vars[i])
 
-        fileName = vars[i] + "_" + case.patchName + ".vtk"
+        fileName = vars[i] + "_" + patch.patchName + ".vtk"
 
         for j in range(0, len(times) ):
 
             fullFile = path + times[j] + "/" + fileName
 
-            points, varData = readAsciiVTK(fullFile)
+            if i == 0 and j == 0:
 
-            tempVar.addTimestep( TIMESTEP(times[j], varData, points) )
+                points, varData = readAsciiVTK(fullFile, True)
+
+                patch.addPoints(points)
+
+            else:
+
+                varData = readAsciiVTK(fullFile, False)
+
+            tempVar.addTimestep( TIMESTEP(times[j], varData) )
 
             printProgressBar(j, len(times)-1)
 
         if vars[i] in vectors:
-            case.addVector(tempVar)
+            patch.addVector(tempVar)
 
         else:
-            case.addScalar(tempVar)
+            patch.addScalar(tempVar)
 
-def readAsciiVTK(file):
+def readAsciiVTK(file, readPoints):
 
     with open(file, "r") as f:
         data = f.readlines()
 
     nPoints = int(data[4].split()[1])
 
-    coords = data[5:nPoints+5]
+    if readPoints:
 
-    for i in range(0,nPoints):
+        coords = data[5:nPoints+5]
 
-        coords[i] = coords[i].split()
+        for i in range(0,nPoints):
 
-    coords = np.array(coords, "float64")
+            coords[i] = coords[i].split()
+
+        coords = np.array(coords, "float64")
 
     offset = int(data[nPoints+6].split()[1])
 
@@ -68,4 +77,10 @@ def readAsciiVTK(file):
 
     varData = np.array(varData, "float64")
 
-    return coords, varData
+    if readPoints:
+
+        return coords, varData
+
+    else:
+
+        return varData

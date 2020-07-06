@@ -152,7 +152,7 @@ def reconstructPatch(OUTPUT, patch, inputs):
 
             time = float(times[t])
 
-            tempVar.addTimestep( TIMESTEP(time, reconstructTimestep(OUTPUT.vars[i].meanField, OUTPUT.vars[i].modes, time, period, OUTPUT.vars[i].alpha), OUTPUT.coords) )
+            tempVar.addTimestep( TIMESTEP(time, reconstructTimestep(OUTPUT.vars[i].meanField, OUTPUT.vars[i].modes, time, period, OUTPUT.vars[i].alpha)) )
 
             printProgressBar(t, len(times)-1)
 

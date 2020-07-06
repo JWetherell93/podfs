@@ -7,7 +7,7 @@ import sys
 from .dataTypes import VECTOR, TIMESTEP
 from .utilities import isFloat
 
-def readDigitalFilterData(patch, path):
+def readPreCalcDFData(patch, path):
 
     U = VECTOR('U')
 
@@ -23,13 +23,21 @@ def readDigitalFilterData(patch, path):
 
         filename = path + timeFiles[i] + ".prf"
 
-        points, timeData = readPRF(filename)
+        if i == 0:
 
-        U.addTimestep( TIMESTEP(timeFiles[i], timeData, points) )
+            points, timeData = readPRF(filename, True)
+
+            patch.addPoints(points)
+
+        else:
+
+            timeData = readPRF(filename, False)
+
+        U.addTimestep( TIMESTEP(timeFiles[i], timeData) )
 
     patch.addVector(U)
 
-def readPRF(filename):
+def readPRF(filename, returnPoints):
 
     with open(filename, 'r') as f:
         data = f.readlines()
@@ -49,4 +57,7 @@ def readPRF(filename):
     points = data[:,:3]
     U = data[:,3:]
 
-    return points, U
+    if returnPoints:
+        return points, U
+    else:
+        return U

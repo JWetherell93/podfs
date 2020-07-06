@@ -1,4 +1,4 @@
 vectors = ["U"]
 
-readFormats = ['OpenFOAMVTK', 'DigitalFilter', 'resume']
+readFormats = ['OpenFOAMVTK', 'PreCalcDF', 'resume']
 writeFormats = ['OpenFOAM']
